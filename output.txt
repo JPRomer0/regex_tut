@@ -1,0 +1,71 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host origin.warframe.com:443 was resolved.
+* IPv6: 2600:1419:1200:68c::2587, 2600:1419:1200:686::2587
+* IPv4: 23.12.167.96
+*   Trying [2600:1419:1200:68c::2587]:443...
+* Connected to origin.warframe.com (2600:1419:1200:68c::2587) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: none
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [35 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [4084 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [80 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / id-ecPublicKey
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=CA; ST=Ontario; L=London; O=Digital Extremes Ltd; CN=warframe.com
+*  start date: Nov 26 00:00:00 2023 GMT
+*  expire date: Nov 26 23:59:59 2024 GMT
+*  subjectAltName: host "origin.warframe.com" matched cert's "origin.warframe.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha1WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /PublicExport/index_en.txt.lzma HTTP/1.1
+> Host: origin.warframe.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+>
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [265 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [265 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 200 OK
+< Server: Apache
+< Last-Modified: Tue, 09 Jan 2024 19:02:45 GMT
+< ETag: "1f0-60e87f5b05e48"
+< Accept-Ranges: bytes
+< Content-Length: 496
+< Cache-Control: no-cache
+< Access-Control-Allow-Origin: *
+< Access-Control-Expose-Headers: ETag
+< Pragma: no-cache
+< Content-Type: text/plain
+< Date: Wed, 10 Jan 2024 21:42:39 GMT
+< Connection: keep-alive
+<
+{ [496 bytes data]
+100   496  100   496    0     0   1498      0 --:--:-- --:--:-- --:--:--  1503
+* Connection #0 to host origin.warframe.com left intact
