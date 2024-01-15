@@ -1,0 +1,16 @@
+http://content.warframe.com/PublicExport/Manifest/ExportCustoms_en.json!00_4Jv0BkqYbs+lI3dyYBOIWA
+http://content.warframe.com/PublicExport/Manifest/ExportDrones_en.json!00_LZKVJWzyNlEXy-hI3mpGnA
+http://content.warframe.com/PublicExport/Manifest/ExportFlavour_en.json!00_Ax1yPKUvcrItIfR8+efxTg
+http://content.warframe.com/PublicExport/Manifest/ExportFusionBundles_en.json!00_yOD81zJOvs6qph81j6McIQ
+http://content.warframe.com/PublicExport/Manifest/ExportGear_en.json!00_vDORxLZj8+s1Ne6WeNLyLw
+http://content.warframe.com/PublicExport/Manifest/ExportKeys_en.json!00_T45ANM+yxI243THGJ4J9YQ
+http://content.warframe.com/PublicExport/Manifest/ExportRecipes_en.json!00_0KKZ6X4--MMF-W1QSfmo3A
+http://content.warframe.com/PublicExport/Manifest/ExportRegions_en.json!00_Wd0STWE7PUqh-t6hwSBxFw
+http://content.warframe.com/PublicExport/Manifest/ExportRelicArcane_en.json!00_2qcZZ6iIV6prxMQocBeOAQ
+http://content.warframe.com/PublicExport/Manifest/ExportResources_en.json!00_yaLo+89b8EZmyoDUwGqVGw
+http://content.warframe.com/PublicExport/Manifest/ExportSentinels_en.json!00_2ugnAK2xCo3m0mII3yi+5w
+http://content.warframe.com/PublicExport/Manifest/ExportSortieRewards_en.json!00_35OONqQEBGvP+y9ooSRn-Q
+http://content.warframe.com/PublicExport/Manifest/ExportUpgrades_en.json!00_UaeKtNDoAn2gSXTIgNoPrw
+http://content.warframe.com/PublicExport/Manifest/ExportWarframes_en.json!00_7e88nPhGFL4df1cmm-cLnQ
+http://content.warframe.com/PublicExport/Manifest/ExportWeapons_en.json!00_7IpQBg-3w3MSysJSS0CSnw
+http://content.warframe.com/PublicExport/Manifest/ExportManifest.json!00_2HvkJpcZQC0rk6OVVGuhZg
