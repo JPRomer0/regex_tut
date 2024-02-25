@@ -1,12 +1,23 @@
-//  use regex::Captures;
 use regex::Regex;
 use regex::RegexBuilder;
+use serde::Deserialize;
+use serde::Serialize;
+use serde_json::Value;
+// use serde_json::Value::Array;
+// use serde_json::Value::Bool;
+// use serde_json::Value::Null;
+// use serde_json::Value::Number;
+// use serde_json::Value::Object;
+// use serde_json::Value::String as Str;
+use std::fs;
+use std::io;
+use std::io::Read;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
 use strum::IntoEnumIterator;
-//use serde::{Deserialize, Serialize};
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
-use std::{fs, io};
+// use std::time::SystemTime;
+// use std::time::UNIX_EPOCH;
 
 // contains all the links from which json data from the game can be extracted
 const PUBLIC_EXPORT: &'static str = "https://origin.warframe.com/PublicExport/index_en.txt.lzma";
@@ -20,17 +31,291 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for db in Database::iter() {
         update_database(db)?
     }
+
+    // deserializing weapons
+    let path: PathBuf = std::env::current_dir()?;
+    let mut weapons_path: PathBuf = path.clone();
+    weapons_path.push("weapons.txt");
+    let weapons_file_content: String = fs::read_to_string(&weapons_path)?;
+    // into value first to circumvent shit json (duplicate keys Error)
+    let weapons_val: Value = serde_json::from_str(&weapons_file_content)?;
+    let weapons: Weapons = serde_json::from_value(weapons_val)?;
+
+    // deserializing warframes
+    let mut warframes_path: PathBuf = path.clone();
+    warframes_path.push("warframes.txt");
+    let warframes_file_content: String = fs::read_to_string(&warframes_path)?;
+
+    let warframes_val: Value = serde_json::from_str(&warframes_file_content)?;
+    let warframes: Warframes = serde_json::from_value(warframes_val)?;
+
+    // deserializing relic_arcane
+    let mut relic_arcane_path: PathBuf = path.clone();
+    relic_arcane_path.push("relic_arcane.txt");
+    let relic_arcane_file_content: String = fs::read_to_string(&relic_arcane_path)?;
+
+    let relic_arcane_val: RelicArcanes = serde_json::from_str(&relic_arcane_file_content)?;
+
+    // let regex: Regex = Regex::new(r"Arcane").unwrap();
+
+    for something in relic_arcane_val.export_relic_arcane.iter() {
+        if something.description.is_some() {
+            println!("{}", something.name);
+                println!("{:?}", something.description);
+            std::thread::sleep(std::time::Duration::from_millis(30));
+        }
+    }
+
     Ok(())
 }
 
-struct ProgramData {
-    // date = seconds since unix epoch till given time
-    date_last_time_program_run: u64,
-    date_last_public_export_update: u64,
-    links_up_to_date: bool,
-    json_weapons_up_to_date: bool,
-    json_warframes_up_to_date: bool,
+// fn which_variant(value: &Value) -> u8 {
+//     match value {
+//         Null => 0,
+//         Bool(_) => 1,
+//         Number(_) => 2,
+//         Str(_) => 3,
+//         Array(_) => 4,
+//         Object(_) => 5,
+//     }
+// }    
+
+// fn is_melee_weapon(value: &Value) -> bool {
+//     let Some(obj) = value.as_object() else {
+//         return false;
+//     };
+//     if let Some(Number(num)) = obj.get("slot") {
+//         let is_five = num.as_u64() == Some(5);
+//         if !is_five {
+//             return false;
+//         };
+//     }
+
+//     // if let Some(String(string)) = obj.get("")
+//     true
+// }
+
+// fn get_values_that_fulfill_condition(
+//     original_value: &Value,
+//     condition: impl Fn(&Value) -> bool,
+// ) -> Vec<&Value> {
+//     let mut unchecked_values: Vec<&Value> = Vec::new();
+//     let mut matching_values: Vec<&Value> = Vec::new();
+//     unchecked_values.push(original_value);
+
+//     while let Some(value) = unchecked_values.pop() {
+//         if condition(value) {
+//             matching_values.push(value)
+//         } else {
+//             match value {
+//                 Value::Array(array) => {
+//                     unchecked_values.extend(array.iter());
+//                 }
+//                 Value::Object(obj) => {
+//                     unchecked_values.extend(obj.values());
+//                 }
+//                 _ => {}
+//             }
+//         }
+//     }
+//     matching_values
+// }
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "PascalCase")]
+struct RelicArcanes {
+    export_relic_arcane: Vec<RelicOrArcane>,
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct RelicOrArcane {
+    codex_secret: bool,
+    exclude_from_codex: Option<bool>,
+    description: Option<String>,
+    name: String,
+    relic_rewards: Option<Vec<RelicRewards>>,
+    rarity: Option<String>,
+    level_stats: Option<Vec<LevelStats>>,
+    unique_name: String,
+}
+
+
+// struct Arcane {
+    
+// }
+
+struct Relic {
+    codex_secret: bool,
+    exclude_from_codex: Option<bool>,
+    description: Option<String>,
+    name: String,
+    relic_rewards: Vec<RelicRewards>,
+    rarity: Option<String>,
+    unique_name: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct LevelStats {
+    stats: Vec<String>,
+}
+
+
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct RelicRewards {
+    item_count: u16,
+    rarity: String,
+    reward_name: String,
+    tier: u8,
+}
+
+// #[derive(Deserialize, Serialize, Debug)]
+// #[serde(deny_unknown_fields, rename_all = "camelCase")]
+// struct Relic {
+//     codex_secret: bool,
+//     exclude_from_codex: Option<bool>,
+//     description: Option<String>,
+//     name: String,
+//     relic_rewards: Value,
+//     rarity: Option<String>,
+//     level_stats: Option<Vec<Value>>,
+//     unique_name: String,
+
+// }
+
+// #[derive(Deserialize, Serialize, Debug)]
+// #[serde(deny_unknown_fields, rename_all = "camelCase")]
+// enum RelicOrNot {
+//     Relic(Relic),
+//     Not(Value),
+// }
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "PascalCase")]
+struct Weapons {
+    export_railjack_weapons: Vec<RailjackWeapon>,
+    export_weapons: Vec<Weapon>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct RailjackWeapon {
+    accuracy: f64,
+    codex_secret: bool,
+    critical_chance: f64,
+    critical_multiplier: f64,
+    damage_per_shot: Vec<f64>,
+    description: String,
+    exclude_from_codex: bool,
+    fire_rate: f64,
+    magazine_size: u32,
+    mastery_req: u32,
+    multishot: u16,
+    name: String,
+    noise: String,
+    omega_attenuation: f64,
+    proc_chance: f64,
+    product_category: String,
+    reload_time: f64,
+    slot: u32,
+    total_damage: f64,
+    trigger: String,
+    unique_name: String,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct Weapon {
+    accuracy: Option<f64>,
+    blocking_angle: Option<u32>,
+    codex_secret: bool,
+    combo_duration: Option<u32>,
+    critical_chance: f64,
+    critical_multiplier: f64,
+    damage_per_shot: Vec<f64>,
+    description: String,
+    exclude_from_codex: Option<bool>,
+    fire_rate: f64,
+    follow_through: Option<f64>,
+    heavy_attack_damage: Option<u32>,
+    heavy_slam_attack: Option<u32>,
+    heavy_slam_radial_damage: Option<u32>,
+    heavy_slam_radius: Option<u32>,
+    magazine_size: Option<u32>,
+    mastery_req: u32,
+    max_level_cap: Option<u32>,
+    multishot: Option<u16>,
+    name: String,
+    noise: Option<String>,
+    omega_attenuation: f64,
+    prime_omega_attenuation: Option<f64>,
+    proc_chance: f64,
+    product_category: String,
+    range: Option<f64>,
+    slam_attack: Option<u32>,
+    slam_radial_damage: Option<u32>,
+    slam_radius: Option<u32>,
+    slide_attack: Option<u32>,
+    reload_time: Option<f64>,
+    sentinel: Option<bool>,
+    slot: Option<u32>,
+    total_damage: f64,
+    trigger: Option<String>,
+    unique_name: String,
+    wind_up: Option<f64>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "PascalCase")]
+struct Warframes {
+    export_warframes: Vec<Warframe>,
+    export_abilities: Vec<Ability>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct Warframe {
+    abilities: Vec<Ability>,
+    armor: u32,
+    codex_secret: bool,
+    description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    exalted: Option<Vec<String>>,
+    health: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    long_description: Option<String>,
+    mastery_req: u32,
+    name: String,
+    parent_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    passive_description: Option<String>,
+    power: u32,
+    product_category: String,
+    shield: u32,
+    sprint_speed: serde_json::Number,
+    stamina: u32,
+    unique_name: String,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct Ability {
+    ability_unique_name: String,
+    ability_name: String,
+    description: String,
+}
+
+// struct ProgramData {
+//     // date = seconds since unix epoch till given time
+//     date_last_time_program_run: u64,
+//     date_last_public_export_update: u64,
+//     links_up_to_date: bool,
+//     json_weapons_up_to_date: bool,
+//     json_warframes_up_to_date: bool,
+// }
 
 // CLI should work like:
 // wfdb (WarFrame DataBase)
@@ -61,6 +346,15 @@ enum Database {
     Weapons,
     Manifest,
 }
+
+// struct WeaponsSchema {
+//     uniqueName: String,
+//     name: String,
+//     description: String,
+//     codexSecret: bool,
+//     parentName: String,
+//     excludeFromCodex: bool,
+// }
 
 fn update_links() -> Result<(), Box<dyn std::error::Error>> {
     // I get a "Response" type from the page that contains info on the HTTP transaction
@@ -127,10 +421,10 @@ fn update_database(db: Database) -> Result<(), Box<dyn std::error::Error>> {
 
     let request_db_json = reqwest::blocking::get(&db_url)?; //TODO: Error handling
 
-    let mut db_json: String = request_db_json.text()?;
+    let db_json_raw: String = request_db_json.text()?;
 
-    // remove whitespace characters
-    db_json.retain(|char| !char.is_whitespace());
+    // cleaning up so it's able to be parsed
+    let db_json = db_json_raw.replace("\r\n", "\\n");
 
     let write_to = match db {
         Database::Customs => "customs.txt",
@@ -158,12 +452,6 @@ fn update_database(db: Database) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn delete_whitespace(string: &str) -> String {
-    let mut output = string.to_string();
-    output.retain(|c| !c.is_whitespace());
-    output
-}
-
 fn url_match(regex: &Regex, urls: &str) -> Option<String> {
     match regex.find(&urls) {
         Some(first_match) => Some(first_match.as_str().to_owned()),
@@ -171,17 +459,17 @@ fn url_match(regex: &Regex, urls: &str) -> Option<String> {
     }
 }
 
-fn borrador() {
-    let secs_since_unix_epoch = SystemTime::now().duration_since(UNIX_EPOCH);
-    if let Ok(seconds) = secs_since_unix_epoch {
-        println!("YAY, seconds: {:?}", seconds);
-        println!("Year: {}", 1970 + seconds.as_secs() / (365 * 24 * 60 * 60));
-    }
-    let possible_path: Result<PathBuf, io::Error> = std::env::current_dir();
-    if let Ok(path) = possible_path {
-        println!("YAY, path: {:?}", path);
-    }
-}
+// fn borrador() {
+//     let secs_since_unix_epoch = SystemTime::now().duration_since(UNIX_EPOCH);
+//     if let Ok(seconds) = secs_since_unix_epoch {
+//         println!("YAY, seconds: {:?}", seconds);
+//         println!("Year: {}", 1970 + seconds.as_secs() / (365 * 24 * 60 * 60));
+//     }
+//     let possible_path: Result<PathBuf, io::Error> = std::env::current_dir();
+//     if let Ok(path) = possible_path {
+//         println!("YAY, path: {:?}", path);
+//     }
+// }
 
 fn open_no_symlink<P: AsRef<Path>>(path: P) -> io::Result<fs::File> {
     let path = path.as_ref();
@@ -191,9 +479,6 @@ fn open_no_symlink<P: AsRef<Path>>(path: P) -> io::Result<fs::File> {
     if fs::symlink_metadata(path)?.is_symlink() {
         Err(io::Error::other("symlink not allowed"))
     } else {
-        fs::OpenOptions::new()
-            .write(true)
-            .read(true)
-            .open(path)
+        fs::OpenOptions::new().write(true).read(true).open(path)
     }
 }
