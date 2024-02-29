@@ -20,6 +20,10 @@ const LINK_BASE: &'static str = "http://content.warframe.com/PublicExport/Manife
 // Where I save the links
 const LINKS_SAVE_FILE: &'static str = "links.txt";
 
+mod warframe_structs;
+
+use warframe_structs::relic_or_arcane;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // update_links()?;
     // for db in Database::iter() {
@@ -184,7 +188,6 @@ struct Arcane {
 
 struct ArcaneInfo {
     name: String,
-
 }
 
 //useless info
