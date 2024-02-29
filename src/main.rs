@@ -3,12 +3,6 @@ use regex::RegexBuilder;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value;
-// use serde_json::Value::Array;
-// use serde_json::Value::Bool;
-// use serde_json::Value::Null;
-// use serde_json::Value::Number;
-// use serde_json::Value::Object;
-// use serde_json::Value::String as Str;
 use std::fs;
 use std::io;
 use std::io::Read;
@@ -27,27 +21,27 @@ const LINK_BASE: &'static str = "http://content.warframe.com/PublicExport/Manife
 const LINKS_SAVE_FILE: &'static str = "links.txt";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    update_links()?;
-    for db in Database::iter() {
-        update_database(db)?
-    }
+    // update_links()?;
+    // for db in Database::iter() {
+    //     update_database(db)?
+    // }
 
     // deserializing weapons
     let path: PathBuf = std::env::current_dir()?;
-    let mut weapons_path: PathBuf = path.clone();
-    weapons_path.push("weapons.txt");
-    let weapons_file_content: String = fs::read_to_string(&weapons_path)?;
-    // into value first to circumvent shit json (duplicate keys Error)
-    let weapons_val: Value = serde_json::from_str(&weapons_file_content)?;
-    let weapons: Weapons = serde_json::from_value(weapons_val)?;
+    // let mut weapons_path: PathBuf = path.clone();
+    // weapons_path.push("weapons.txt");
+    // let weapons_file_content: String = fs::read_to_string(&weapons_path)?;
+    // // into value first to circumvent shit json (duplicate keys Error)
+    // let weapons_val: Value = serde_json::from_str(&weapons_file_content)?;
+    // let weapons: Weapons = serde_json::from_value(weapons_val)?;
 
-    // deserializing warframes
-    let mut warframes_path: PathBuf = path.clone();
-    warframes_path.push("warframes.txt");
-    let warframes_file_content: String = fs::read_to_string(&warframes_path)?;
+    // // deserializing warframes
+    // let mut warframes_path: PathBuf = path.clone();
+    // warframes_path.push("warframes.txt");
+    // let warframes_file_content: String = fs::read_to_string(&warframes_path)?;
 
-    let warframes_val: Value = serde_json::from_str(&warframes_file_content)?;
-    let warframes: Warframes = serde_json::from_value(warframes_val)?;
+    // let warframes_val: Value = serde_json::from_str(&warframes_file_content)?;
+    // let warframes: Warframes = serde_json::from_value(warframes_val)?;
 
     // deserializing relic_arcane
     let mut relic_arcane_path: PathBuf = path.clone();
@@ -56,18 +50,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let relic_arcane_val: RelicArcanes = serde_json::from_str(&relic_arcane_file_content)?;
 
-    // let regex: Regex = Regex::new(r"Arcane").unwrap();
+    let relics_it = relic_arcane_val.export_relic_arcane
+        .iter()
+        .filter_map(|relic_or_not| match relic_or_not {
+            RelicOrNot::Relic(something) => Some(something),
+            _ => None,
+        });
+  
+    for relic in relics_it {
+        println!("{:?}", relic.unique_name);
 
-    for something in relic_arcane_val.export_relic_arcane.iter() {
-        if something.description.is_some() {
-            println!("{}", something.name);
-                println!("{:?}", something.description);
-            std::thread::sleep(std::time::Duration::from_millis(30));
-        }
+        std::thread::sleep(std::time::Duration::from_millis(2));
     }
-
     Ok(())
 }
+
 
 // fn which_variant(value: &Value) -> u8 {
 //     match value {
@@ -80,79 +77,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 //     }
 // }    
 
-// fn is_melee_weapon(value: &Value) -> bool {
-//     let Some(obj) = value.as_object() else {
-//         return false;
-//     };
-//     if let Some(Number(num)) = obj.get("slot") {
-//         let is_five = num.as_u64() == Some(5);
-//         if !is_five {
-//             return false;
-//         };
-//     }
+#[derive(Serialize, Deserialize, Debug)]
+struct ItemID(Box<Path>);
 
-//     // if let Some(String(string)) = obj.get("")
-//     true
-// }
 
-// fn get_values_that_fulfill_condition(
-//     original_value: &Value,
-//     condition: impl Fn(&Value) -> bool,
-// ) -> Vec<&Value> {
-//     let mut unchecked_values: Vec<&Value> = Vec::new();
-//     let mut matching_values: Vec<&Value> = Vec::new();
-//     unchecked_values.push(original_value);
-
-//     while let Some(value) = unchecked_values.pop() {
-//         if condition(value) {
-//             matching_values.push(value)
-//         } else {
-//             match value {
-//                 Value::Array(array) => {
-//                     unchecked_values.extend(array.iter());
-//                 }
-//                 Value::Object(obj) => {
-//                     unchecked_values.extend(obj.values());
-//                 }
-//                 _ => {}
-//             }
-//         }
-//     }
-//     matching_values
-// }
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "PascalCase")]
 struct RelicArcanes {
-    export_relic_arcane: Vec<RelicOrArcane>,
+    export_relic_arcane: Vec<RelicOrNot>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
-struct RelicOrArcane {
-    codex_secret: bool,
-    exclude_from_codex: Option<bool>,
-    description: Option<String>,
-    name: String,
-    relic_rewards: Option<Vec<RelicRewards>>,
-    rarity: Option<String>,
-    level_stats: Option<Vec<LevelStats>>,
-    unique_name: String,
-}
-
-
-// struct Arcane {
-    
-// }
-
 struct Relic {
     codex_secret: bool,
-    exclude_from_codex: Option<bool>,
-    description: Option<String>,
+    description: String,
     name: String,
     relic_rewards: Vec<RelicRewards>,
-    rarity: Option<String>,
-    unique_name: String,
+    unique_name: ItemID,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -161,7 +104,55 @@ struct LevelStats {
     stats: Vec<String>,
 }
 
+struct VoidRelic {
+    kind: VoidRelicKind,
+    name: (char, u16),
+    rare_reward:ItemID,
+    uncommon_rewards: [ItemID; 2],
+    common_rewards: [ItemID; 3],
+    refinement: RelicRefinement,
+}
 
+enum VoidRelicKind {
+    Lith,
+    Meso,
+    Neo,
+    Axi,
+}
+
+struct RequiemRelic {
+    name: RequiemRelicKind,
+    rare_reward: String, //always exilus adapter
+    uncommon_rewards: [RequiemMods; 2],
+    common_rewards: [String; 3], //always the same 3
+    refinement: RelicRefinement,
+}
+
+enum RelicRefinement {
+    Intact,
+    Exceptional,
+    Flawless,
+    Radiant,
+}
+
+enum RequiemRelicKind {
+    I,
+    II,
+    III,
+    IV,
+}
+
+enum RequiemMods {
+    Xata,
+    Lohk,
+    Vome,
+    Jahu,
+    Fass,
+    Ris,
+    Khra,
+    Netra,
+    Oull,
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
@@ -172,26 +163,39 @@ struct RelicRewards {
     tier: u8,
 }
 
-// #[derive(Deserialize, Serialize, Debug)]
-// #[serde(deny_unknown_fields, rename_all = "camelCase")]
-// struct Relic {
-//     codex_secret: bool,
-//     exclude_from_codex: Option<bool>,
-//     description: Option<String>,
-//     name: String,
-//     relic_rewards: Value,
-//     rarity: Option<String>,
-//     level_stats: Option<Vec<Value>>,
-//     unique_name: String,
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(untagged)]
+enum RelicOrNot {
+    Relic(Relic),
+    Arcane(Arcane),
+    CosmeticEnhancer(CosmeticEnhancer),
+}
 
-// }
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct Arcane {
+    codex_secret: bool,
+    exclude_from_codex: Option<bool>, // only 1 is excluded
+    name: String,
+    rarity: Option<String>,
+    level_stats: Vec<LevelStats>,
+    unique_name: String,
+}
 
-// #[derive(Deserialize, Serialize, Debug)]
-// #[serde(deny_unknown_fields, rename_all = "camelCase")]
-// enum RelicOrNot {
-//     Relic(Relic),
-//     Not(Value),
-// }
+struct ArcaneInfo {
+    name: String,
+
+}
+
+//useless info
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct CosmeticEnhancer {
+    codex_secret: bool,
+    exclude_from_codex: bool,
+    name: String,
+    unique_name: String,
+}
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "PascalCase")]
@@ -327,7 +331,8 @@ struct Ability {
 // wfdb --update-links --verbose
 // wfdb --update-database <given-database-here>
 // should report if already up to date or otherwise try to update
-#[derive(strum_macros::EnumIter)]
+
+// #[derive(strum_macros::EnumIter)]
 enum Database {
     Customs,
     Drones,

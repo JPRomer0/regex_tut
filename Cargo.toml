@@ -1,5 +1,5 @@
 [package]
-name = "regex_tut"
+name = "warframe_deserializaton"
 version = "0.1.0"
 edition = "2021"
 
